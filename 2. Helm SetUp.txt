@@ -1,0 +1,87 @@
+=============
+2) Helm - SetUp
+=============
+In ths We will Learn the following
+-----------------------------------------
+A) Setup Docker Desktop
+B) Setup the MiniKube Cluster
+C) Test MiniKube Cluster
+D) Install Helm
+E) Test Helm Installation
+
+A)  Setup the Docker Desktop
+----------------------------------------
+1) Download the Docker Desktop on Windows
+
+https://docs.docker.com/desktop/windows/install/
+
+=> You will download "Docker Desktop Installer.exe"
+=> Run the Installer.
+
+B) Setup Minikube
+-----------------------------
+2) Download the Minikube
+
+https://minikube.sigs.k8s.io/docs/start/
+
+=> You will download - "minikube-installer.exe"
+=> Run the Installer.
+=> Set the Path in System Environment Variables
+
+3) Download the Kubectl
+
+https://kubernetes.io/docs/tasks/tools/install-kubectl-windows/
+
+Download the latest release v1.24.0.
+
+=> You will download "kubectl.exe"
+=> Set the Path in System Environment Variables
+
+D:\MyKubernetes\Minikube
+D:\MyKubernetes\Kubectl
+
+C) Test MiniKube Cluster
+-----------------------------
+4) Open the DockerDesktop and Makesure Docker is Running
+
+5) Start the Minikube
+
+minikube start
+
+6) Run the following Commands
+         kubectl version 
+         kubectl get nodes
+         kubectl get pods
+
+
+D) Install Helm on Windows
+----------------------------------------------------
+7) Download the Helm
+
+https://github.com/helm/helm/releases
+
+=> You will download - "helm-v3.9.0-windows-amd64.zip"
+=> Rename - "helm-v3.9.0.zip"
+
+=> Unzip and move to required folder :D:\Helm-v3.9.0 
+=> Set the Path in System Environment Variables
+D:\Helm-v3.9.0 
+
+D.1) Install Helm on Ubuntu
+---------------------------------------------------------------------------------------------------------
+
+curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+sudo apt-get install apt-transport-https --yes
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+sudo apt-get update
+sudo apt-get install helm
+
+------------------------------------------------------==============================================================
+E) Test Helm Installation
+-----------------------------------
+8) Run the following command
+
+      helm version
+
+9) Now All set to Go and Learn Helm
+

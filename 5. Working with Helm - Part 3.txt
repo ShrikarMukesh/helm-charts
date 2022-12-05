@@ -1,0 +1,286 @@
+========================
+5) Working with Helm -  Part 3
+========================
+=> Templates are the key for every helm chart
+=> Placeholders in the template will be replaced with the values in values.yaml and Chart.yaml files
+=> After Replacing , YAML Configuration files will be used to generate the Kubernetes Manifest.
+=> Generated Manifest will be sent to Kubernetes Cluster
+=> Kubernetes Cluster will create the Resources 
+=> Template are implemented with Go Language Text Template Engine.
+
+1) Template Actions
+================
+=> Most commonly used template element is Actions.
+=> You can define any dynamic login inside the Actions
+
+Syntax:
+-------
+{{  Expression/Logic  }}
+
+Ex:
+   name: {{ include "myjlc-chart.fullname" . }} 
+   replicas: {{ .Values.replicaCount }}
+ 
+{{"     Hello Guys    "}} === {{"     Welcome  !!!   "}}  
+{{"" | nindent 5 }} 
+
+{{- "     Hello Guys    "}} - {{- "     Welcome !!!     "}} 
+{{"" | nindent 5 }} 
+{{- "     Hello Guys    " -}} - {{- "     Welcome !!!     " -}} 
+{{"" | nindent 5 }} 
+
+2) Template Data 
+===================
+=> When you render the Template , It passes all the Data for the Template as Single Object called "."
+
+=> "." is an Object which represents the Data  from values.yaml, Chart.yaml 
+
+Chart.yaml
+---------------
+apiVersion: v2
+name: mytest-chart
+description: A Helm chart for Kubernetes
+type: application
+version: 0.1.0
+appVersion: "1.16.0"
+
+{{.Chart.Name | nindent 5  }} 
+{{.Chart.Version | nindent 5 }}
+{{.Chart.AppVersion | nindent 5 }} 
+
+I want the output as follows
+
+mychartData:
+chatName: mytest-chart
+charVersion: 1.2.5
+appVersion: 9.6.3
+
+mychartData:
+chatName: {{.Chart.Name | nindent 5  }} 
+charVersion: {{.Chart.Version | nindent 5 }}
+appVersion: {{.Chart.AppVersion | nindent 5 }} 
+
+
+values.yaml
+---------------
+myjlc:
+  data: 123
+
+replicaCount: 1
+
+image:
+  repository: nginx
+  pullPolicy: IfNotPresent
+  tag: ""
+
+{{ .Values.myjlc.data | nindent 5  }}
+{{ .Values.replicaCount  | nindent 5  }}
+{{ .Values.image.repository | nindent 5  }}
+
+-----------------------------
+Release: 
+	This object describes the release itself. 
+
+Release.Name: 
+	The release name
+
+Release.Namespace: 
+	The namespace to be released into (if the manifest doesn’t override)
+
+Release.IsUpgrade: 
+	This is set to true if the current operation is an upgrade or rollback.
+
+Release.IsInstall: 
+	This is set to true if the current operation is an install.
+
+Release.Revision: 
+	The revision number for this release. On install, this is 1, and it is incremented with each upgrade and rollback.
+
+Release.Service: 
+	The service that is rendering the present template. On Helm, this is always Helm.
+
+Ex:
+{{ .Release.Name | nindent 5  }}
+{{ .Release.IsInstall | nindent 5  }}
+{{ .Release.Service | nindent 5  }}
+{{ .Release.IsUpgrade | nindent 5  }}
+{{ .Release.Namespace | nindent 5  }}
+
+3) Pipe Operator ( | )
+==============
+=> Allows to Chain multiple Expressions or Commands or Function Calls
+=> Output of Leftside Expression will be passed as Input for Right Side Expression 
+
+Ex:
+{{ .Values.myjlc.data | nindent 5  }}
+
+{{ .Values.myjlc.data | upper | nindent 5  }}
+
+{{ .Values.myjlc.data | lower | nindent 5  }} 
+
+{{ .Values.myjlc.data | lower | quote | nindent 5  }} 
+
+{{ .Values.myjlc.data | default "Ok Guys" | lower | quote | nindent 5  }} 
+
+{{ .Values.myjlc.mydata | lower | nindent 5  }} 
+
+{{ .Values.myjlc.mydata | default "Ok Guys" | lower | nindent 5  }}
+
+4) Functions
+=============
+=> Provides Various Functions to Transform the Data
+
+functions discussed:
+---------------------
+default
+indent
+nindent
+lower
+upper
+quote
+
+Template Function List
+Helm includes many template functions you can take advantage of in templates. 
+They are listed here and broken down by the following categories:
+
+Date
+Dictionaries
+File Path
+Kubernetes and Chart
+Logic and Flow Control
+Lists
+Math
+String
+Type Conversion
+
+
+https://helm.sh/docs/chart_template_guide/function_list/
+
+5) If Statements
+=============
+values.yaml
+------------
+myjlc: 
+  flag: true
+
+{{- if  .Values.myjlc.flag }}
+{{"Hello Guys- Ok"  | nindent 5}}
+{{- end}}
+
+
+{{- if  .Values.myjlc.flag }}
+{{"JLC Guys- Ok"  | nindent 5}}
+{{- else}}
+{{"JLC Guys- Not Ok"  | nindent 5}}
+{{- end}}
+
+A) 
+  replicas: {{ .Values.replicaCount }}   
+
+output: replicas: 5
+
+
+B)
+{{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+
+output:
+either  or   replicas: 5
+
+6) Use with
+=============
+values.yaml
+------------
+myjlc: 
+  fruits: 
+    - apple
+    - banana
+    - orange
+
+
+{{- with  .Values.myjlc.fruits }}
+myfruits:
+{{- toYaml  .  | nindent 2}}
+{{- end}}
+
+7) Looping with Range
+=============
+values.yaml
+------------
+myjlc: 
+  fruits: 
+    - apple
+    - banana
+    - orange
+
+
+{{- range  .Values.myjlc.fruits }}
+{{  .  | indent 5}}
+{{- end}}
+
+I want Ouput as follows
+==================
+myfruits:
+  - apple
+  - banana
+  - orange
+
+myfruits:
+{{- range  .Values.myjlc.fruits }}
+  -{{  .  | indent 1}}
+{{- end}}
+
+
+myfruits:
+{{- range  .Values.myjlc.fruits }}
+  - {{  . | upper | quote |  indent 1}}
+{{- end}}
+
+
+8) Loop with Dictionary Type
+======================
+values.yaml
+------------
+image:
+  repository: nginx
+  pullPolicy: Always
+  tag: ""
+
+
+myImageInfo:
+{{- range  $mykey, $myvalue :=  .Values.image }}
+  - {{ $mykey }}: {{$myvalue}}
+{{- end}}
+
+9) Custom Templates
+=================
+
+values.yml
+--------------
+myjlc: 
+  data: Hello Guys
+
+.helpers.tpl
+-------------------
+{{/* 
+Comments in the Templates
+Comments in the Templates
+Comments in the Templates
+*/}}
+
+{{-  define "myjlc-chart.mytemp" -}}
+{{- .Values.myjlc.data | default "OK Guys" | upper | indent 2}}
+{{- end}}
+
+deployments.yaml
+------------------------
+mydata:{{- template "myjlc-chart.mytemp"}}
+
+
+mybook-store-dev
+mybook-store-test
+mybook-store-prod
+
+
+

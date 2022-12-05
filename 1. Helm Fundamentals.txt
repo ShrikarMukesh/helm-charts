@@ -1,0 +1,143 @@
+===================
+1. Helm - Fundamentals 
+===================
+When You work with Kuberntes without Helm:
+----------------------------------------------------------
+=> When you are deploying your application onto Kubernetes Cluster, You need to do the following.
+1) Create One or More Deployments
+2) Create One or More Services
+3) Create One or More ConfigMaps
+4) Create One or More Secrets
+5) Create One or More PVs
+6) Create One or More PVCs
+etc
+
+=> When You provide above said all to Kubernetes Cluster, Then Kubernetes Cluster will create All the Resources and finally Your Application will be up and running.
+
+=> When you are un-deploying your application from Kubernetes Cluster, You need to do the following.
+1) Delete One or More Deployments
+2) Delete One or More Services
+3) Delete One or More ConfigMaps
+4) Delete One or More Secrets
+5) Delete One or More PVs
+6) Delete One or More PVCs
+etc
+
+=> Finally Your Application will be revomed from Kubernetes Cluster.
+
+=> You need to do all these tasks when ever you want to deploy and un-deploy. Which is a Complex Tasks.
+
+=> You are hard-Coding the Values in YAML Configutaion Files.
+
+=> Kubernetes does not maintain any Revison/Release History
+
+When You work with Kuberntes with Helm:
+----------------------------------------------------------
+=> Helm is Written in Go Programming Language.
+=> Helm is Package Manager for Kubernetes
+
+=> Othet Package Manages you might know.
+apt/apt-get     -- Ubuntu
+yum	        - CentOS
+npm             - Angular and React 
+etc
+
+apt-get install nginx
+apt-get upgrade nginx
+apt-get uninstall nginx
+
+=> Helm also a Package Manager for Kubernetes which simplifies Application Deployments 
+
+=> Helm uses Charts 
+=> Charts are Packages for Helm
+=> Helm sees the Charts and Manages the Deployments.
+
+What Helm can do?
+================
+1) Helm simplifies Kubernetes Deployments
+-----------------------------------------------------------
+=> Helm allows You to deploy and undeploy the Application in Kubernetes Cluster with single command.
+
+Ex: 
+   helm install app_name ......
+   helm upgrade app_name ......
+   helm uninstall app_name ......
+
+2) Helm Maintains the Revision History
+---------------------------------------------------
+=> Whenever you ugrade the deployment , Help internally manages the Revision History.
+=> You can use this Revision numbers to Rollback the deployment if something goes wrong
+
+Ex: 
+   helm rollback app_name ......
+
+3) Dynamic Configurations
+--------------------------------------
+=> All YAML Configurations are Static
+=> Helm gives the YAML Configurations as Templates with Placeholders
+=> You can define the Values in Values.yaml file
+=> Helm Replaces the Template Placeholders with Values in  Values.yaml file
+=> This Allows us to pass Dynamic Values to YAML Configurations 
+
+4) Intelligent Deployments
+-----------------------------------
+=> When you are creating the Resources like Deployments, Services , COnfigMaps, Secrets, PVs, PVCs, SCs directly without Helm, You need to take care about the Order of Resource Creation and Order of Resource Deletion.
+
+=> Helm takes care about the Order of Resource Creation and Order of Resource Deletion.You no need to worry about that.
+
+5) Helm  Lifecycle Hooks
+--------------------------------
+=> You can perform the Specific Tasks in the Cluster with Lifecycle Hooks.
+
+Helm Hooks:
+
+1) pre-install	
+---------------------
+=> Executes after templates are rendered, but before any resources are created in Kubernetes
+
+2) post-install	
+---------------------
+=> Executes after all resources are loaded into Kubernetes
+
+3) pre-delete	
+---------------------
+=> Executes on a deletion request before any resources are deleted from Kubernetes
+
+4) post-delete	
+---------------------
+=> Executes on a deletion request after all of the release's resources have been deleted
+
+5) pre-upgrade	
+---------------------
+=> Executes on an upgrade request after templates are rendered, but before any resources are updated
+
+6) post-upgrade	
+---------------------
+=> Executes on an upgrade request after all resources have been upgraded
+
+7) pre-rollback	
+---------------------
+=> Executes on a rollback request after templates are rendered, but before any resources are rolled back
+
+8) post-rollback	
+---------------------
+=> Executes on a rollback request after all resources have been modified
+
+=========================
+Charts and Chart Repositories
+=========================
+=> Helm uses the concepts of Charts
+=> Charts are like Packages which are used to install your application to the Kubernetes Cluster.
+=> Charts are Stored in Chart Repositories
+
+Some Chart Repositories are
+-----------------------------------
+1) bitnami.com
+ bitnami.com/stacks/helm
+
+----------https://charts.bitnami.com/bitnami
+
+2) helm.sh
+https://artifacthub.io/
+
+----------https://charts.helm.sh/stable

@@ -1,0 +1,443 @@
+==================================================
+3) Working with Helm -  Part 1
+================================================
+
+1) List the Repositories added
+
+helm repo list
+
+2) Add the Helm Repository
+
+helm repo add bitnami https://charts.bitnami.com/bitnami
+
+helm repo add stable https://charts.helm.sh/stable
+
+3) List the Repositories added
+
+helm repo list
+
+4) Remove the Helm Repository
+
+helm repo remove bitnami
+helm repo remove stable 
+
+5) List the Repositories added
+
+helm repo list
+
+6) Add the Helm Repository
+
+helm repo add mybitnami https://charts.bitnami.com/bitnami
+
+helm repo add mystable https://charts.helm.sh/stable
+
+7) List the Repositories added
+
+helm repo list
+
+8) Update the Repositories which are already added
+
+helm repo update
+
+8) Search the Helm Repository
+
+helm search repo mysql  // Latest Versions
+
+helm search repo mysql --versions  // All the Versions
+
+helm search repo database
+
+helm search repo database --versions
+
+9) Install the App in Kubernetes Cluster
+=============================
+9A) Check the Kubernetes Cluster
+---------------------------------------------
+kubectl get pods
+
+kubectl get deployments
+kubectl get statefulset
+kubectl get services
+kubectl get serviceaccount
+kubectl get configmaps
+kubectl get secrets
+
+
+9B) Install MySQL App to Kubernetes Cluster
+----------------------------------------------------
+Syntax:
+helm install <RELEASE_NAME> <CHART_NAME>
+
+Ex:
+helm install mysql-db mybitnami/mysql
+
+
+9C) Check the Kubernetes Cluster
+---------------------------------------------
+kubectl get pods
+
+kubectl get statefulset
+kubectl get services
+kubectl get serviceaccount
+kubectl get configmaps
+kubectl get secrets
+
+
+9D) Check the installation status:
+
+helm status mysql-db
+
+Note : This App is Installed in default NameSpace
+
+10) Install a App in Required NameSpace in Kubernetes Cluster 
+=============================
+10A) Create the NameSpace 
+
+kubectl create namespace jlcbs-test
+
+10B) Check the Kubernetes Cluster in that Namespace
+----------------------------------------------------------------------
+kubectl get pods --namespace jlcbs-test
+
+kubectl get statefulset --namespace jlcbs-test
+kubectl get services --namespace jlcbs-test
+kubectl get serviceaccount --namespace jlcbs-test
+kubectl get configmaps --namespace jlcbs-test
+kubectl get secrets --namespace jlcbs-test
+
+
+10C) Install MySQL App to Kubernetes Cluster
+----------------------------------------------------
+helm install --namespace  jlcbs-test mysql-db mybitnami/mysql
+helm install -n  jlcbs-test mysql-db mybitnami/mysql
+
+10D) Check the Kubernetes Cluster in that Namespace
+----------------------------------------------------------------------
+kubectl get pods --namespace jlcbs-test
+
+kubectl get statefulset --namespace jlcbs-test
+kubectl get services --namespace jlcbs-test
+kubectl get serviceaccount --namespace jlcbs-test
+kubectl get configmaps --namespace jlcbs-test
+kubectl get secrets --namespace jlcbs-test
+
+Note : This App is Installed in jlcbs-test NameSpace
+
+11) List the Packages/Installations/Apps installed in Kubernetes Cluster 
+---------------------------------------------------------------------------------------------
+helm list
+helm ls
+helm list --namespace jlcbs-test
+
+12) UnInstall the Apps from default Namespace
+--------------------------------------------------------------
+helm list
+
+helm uninstall mysql-db
+
+helm list
+
+kubectl get pods
+
+kubectl get statefulset
+kubectl get services
+kubectl get serviceaccount
+kubectl get configmaps
+kubectl get secrets
+
+13) UnInstall the Apps from required Namespace
+--------------------------------------------------------------
+
+helm list --namespace jlcbs-test 
+
+helm uninstall mysql-db --namespace jlcbs-test 
+
+helm list --namespace jlcbs-test 
+
+kubectl get pods --namespace jlcbs-test
+
+kubectl get statefulset --namespace jlcbs-test
+kubectl get services --namespace jlcbs-test
+kubectl get serviceaccount --namespace jlcbs-test
+kubectl get configmaps --namespace jlcbs-test
+kubectl get secrets --namespace jlcbs-test
+
+14) Providing Custom Values
+----------------------------------------
+=> Any Value which you want to override with the Values of Your YAML Configurations.
+
+=> You can pass the Custom Values in Two Ways
+A) Pass Individual Values from Command-Line
+B) Write the Values in yaml file and Pass the YAML File from Command-Line
+
+A) Pass Individual Values from Command-Line
+----------------------------------------------------------------
+helm install mysql-db1  mybitnami/mysql --set auth.rootPassword=myjlc123
+
+kubectl get secrets
+
+echo $(kubectl get secret mysql-db1 -o jsonpath="{.data.mysql-root-password}")
+
+bXlqbGMxMjM=    ==> https://www.base64decode.org/ we can decode and check this value
+
+B) Write the Values in yaml file and Pass the YAML File from Command-Line
+---------------------------------------------------------------------------------------------------
+myvalues.yaml
+==========
+auth:
+   rootPassword: hello123
+
+helm install mysql-db2 mybitnami/mysql --values myvalues.yaml
+
+ echo  $(kubectl get secret mysql-db2 -o jsonpath="{.data.mysql-root-password}")
+
+aGVsbG8xMjM=
+
+15) Using helm --dry-run
+===================
+=> --dry-run option will validate and verify your chart by connecting to kubernetes api server 
+=> After successful validation, It will render the manifest in the form of YAMLs(kubernetes resources)
+
+Ex:
+helm install mysql-db mybitnami/mysql  --dry-run
+
+16) Using helm template 
+==================================================================================================
+
+=> helm template  will generate the YAML manifest but it can not guarantee that generated kubernetes resource(YAMLs) is valid or not.
+
+=> helm template  will not connect to kubernetes api server for Validation.
+
+Ex:
+helm template mysql-db mybitnami/mysql
+
+===========================================================================================
+Do this Before Learning Helm Releases
+======================
+kubectl get secrets
+helm uninstall mysql-db1
+kubectl get secrets
+helm uninstall mysql-db2
+kubectl get secrets
+
+17) Helm Releases
+===================================================================================
+
+=> Helm stores the Release Information in the Secrets.
+
+kubectl get secrets
+
+helm install mysql-db  mybitnami/mysql  
+
+kubectl get secrets
+
+helm list
+
+helm upgrade mysql-db  mybitnami/mysql --set auth.rootPassword=myjlc123
+
+kubectl get secrets
+
+helm list
+
+helm upgrade mysql-db  mybitnami/mysql --set auth.rootPassword=hello123
+
+kubectl get secrets
+
+helm list
+
+NAME            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART           APP VERSION
+mysql-db        default         3               2022-07-02 11:16:05.8093539 +0530 IST   deployed        mysql-9.1.8     8.0.29
+
+kubectl get secrects
+
+NAME                             TYPE                 DATA   AGE
+mysql-db                         Opaque               2      3m44s
+sh.helm.release.v1.mysql-db.v1   helm.sh/release.v1   1      3m44s
+sh.helm.release.v1.mysql-db.v2   helm.sh/release.v1   1      2m11s
+sh.helm.release.v1.mysql-db.v3   helm.sh/release.v1   1      8s
+
+18) Helm History
+==============
+=> History prints historical revisions for a given release.
+=> A default maximum of 256 revisions will be returned. 
+=> Setting '--max' configures the maximum length of the revision list returned.
+
+Ex:
+
+helm history mysql-db
+
+REVISION        UPDATED                         STATUS          CHART           APP VERSION     DESCRIPTION
+1               Sat Jul  2 11:12:29 2022        superseded      mysql-9.1.8     8.0.29          Install complete
+2               Sat Jul  2 11:14:03 2022        superseded      mysql-9.1.8     8.0.29          Upgrade complete
+3               Sat Jul  2 11:16:05 2022        deployed        mysql-9.1.8     8.0.29          Upgrade complete
+
+
+19) Helm Upgrade
+==============
+=> This upgrades a release to a new version of a chart.
+
+Ex:
+helm upgrade mysql-db mybitnami/mysql
+
+If you want to override the Values, You can
+
+helm upgrade mysql-db1  mybitnami/mysql --set auth.rootPassword=myjlc123
+
+helm upgrade mysql-db2 mybitnami/mysql --values myvalues.yaml
+
+Note : This upgrades only Required changes to Kubernetes Cluster.
+
+
+20) Helm Rollback
+==============
+=> This rolls back a release to a previous revision.
+
+Ex:
+
+helm rollback mysql-db 2
+
+helm list
+NAME            NAMESPACE       REVISION        UPDATED                                 STATUS          CHART           APP VERSION
+mysql-db        default         4               2022-07-02 11:20:03.0233376 +0530 IST   deployed        mysql-9.1.8     8.0.29
+
+helm history mysql-db
+
+REVISION        UPDATED                         STATUS          CHART           APP VERSION     DESCRIPTION
+1               Sat Jul  2 11:12:29 2022        superseded      mysql-9.1.8     8.0.29          Install complete
+2               Sat Jul  2 11:14:03 2022        superseded      mysql-9.1.8     8.0.29          Upgrade complete
+3               Sat Jul  2 11:16:05 2022        superseded      mysql-9.1.8     8.0.29          Upgrade complete
+4               Sat Jul  2 11:20:03 2022        deployed        mysql-9.1.8     8.0.29          Rollback to 2
+
+Demo:
+=====
+helm list
+
+helm history mysql-db
+
+kubectl get secrets
+
+helm install mysql-db mybitnami/mysql
+
+helm list
+
+helm history mysql-db
+
+kubectl get secrets
+
+helm upgrade mysql-db  mybitnami/mysql --set auth.rootPassword=myjlc123
+ 
+helm list
+
+helm history mysql-db
+
+kubectl get secrets
+
+helm upgrade mysql-db  mybitnami/mysql --set auth.rootPassword=hello123
+
+helm list
+
+helm history mysql-db
+
+kubectl get secrets
+
+helm rollback mysql-db 2
+
+helm list
+
+helm history mysql-db
+
+kubectl get secrets
+
+Note 1:  helm uninstall => will delete the History.
+
+helm uninstall mysql-db
+
+Note 2:  helm uninstall with --keep-history option => will not delete the History.
+
+helm uninstall mysql-db  --keep-history
+
+**21) Helm Upgrade with --install option
+=================================
+=> if the release by this name doesn't exist, then run an install
+=> if the release by this name already exist, then run an upgrade
+
+Ex:
+helm upgrade --install mysql-db mybitnami/mysql
+
+22) Helm Upgrade with --wait and --timeout options
+======================================
+=> When ever Kubernetes Manifest is Ready them help will consider the Instalation as Successful even all the Pods are Not ready.
+
+Ex:
+helm upgrade mysql-db mybitnami/mysql
+helm install mysql-db mybitnami/mysql
+
+=> if you use --wait then It will wait until all Pods, PVCs, Services, and minimum number of Pods of a Deployment, StatefulSet, or ReplicaSet are in a ready state before marking the release as successful. 
+=> By default, the timeout is set to 5 minutes(300 seconds)
+
+Ex:
+helm upgrade mysql-db mybitnami/mysql --wait
+helm install mysql-db mybitnami/mysql --wait
+
+=> If you want to wait for longer period, then use --timeout
+=> It will wait for as long as --timeout is specified
+
+Ex:
+helm upgrade mysql-db mybitnami/mysql --wait --timeout 10m30s
+helm install mysql-db mybitnami/mysql --wait --timeout 10m30s
+
+23) Helm Upgrade with  --atomic option
+=======================================================================================================================================================================
+
+=> if you specify --atomic then It will automatically rollbacks to previously successfull release if the current upgrade is failed.
+=> --wait flag will be set automatically if --atomic is used
+
+Ex:
+helm upgrade mysql-db mybitnami/mysql --wait  // Wait time : 5 Min, You do rollback
+helm upgrade mysql-db mybitnami/mysql --atomic  //Wait time : 5Min , Aotomatic Rollback
+
+helm upgrade mysql-db mybitnami/mysql --wait  --timeout 10m // Wait time : 10 Min, You do rollback
+helm upgrade mysql-db mybitnami/mysql --atomic  --timeout 10m//Wait time : 10Min , Automatic Rollback
+
+helm install mysql-db mybitnami/mysql --atomic
+helm install mysql-db mybitnami/mysql --atomic  --timeout 10m30s
+
+24) Helm Upgrade with  --cleanup-on-fail option
+===================================================================================================================================================================
+  => Cleans all the resources created in this upgrade when upgrade fails
+
+Ex:
+helm upgrade mysql-db mybitnami/mysql --cleanup-on-fail
+
+=======================================================================
+25) Helm get 
+============
+=>Download extended information of a named release
+
+Ex:
+helm ls
+helm get notes mysql-db
+helm get values mysql-db
+helm get values mysql-db --all
+helm get values mysql-db --kube-apiserver 
+
+==============================
+helm list
+helm install
+helm upgrade
+helm rollback
+helm uninsall
+helm history
+helm template
+helm get
+helm status
+
+--dry-run
+--wait
+--timeout
+--atomic
+--clean-on-fail
+
+
+
+
